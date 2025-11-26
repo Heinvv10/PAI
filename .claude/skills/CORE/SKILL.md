@@ -249,3 +249,77 @@ tools:
 ```
 
 **Benefit**: Reduces initial context by 40-60% while maintaining full capability.
+
+---
+
+## 📈 Observability & Metrics
+
+### Veritas Monitoring Stack (When Docker Running)
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| **Grafana** | http://localhost:3050 | Dashboards (admin/veritas2024) |
+| **Prometheus** | http://localhost:9090 | Metrics collection |
+| **Loki** | http://localhost:3100 | Log aggregation |
+
+Start monitoring:
+```bash
+cd "C:/Jarvis/AI Workspace/Veritas"
+docker compose -f docker-compose.veritas.yml --profile monitoring up -d
+```
+
+### Token Usage Tracking (Optional)
+
+PAI includes a token tracking hook that:
+- Estimates tokens per tool call
+- Tracks cumulative session costs
+- Logs summaries every 10 tool calls
+- Sends metrics to Veritas if running
+
+### Tool Result Caching (Optional)
+
+Cacheable operations for better performance:
+- **Read**: File contents (5min TTL, invalidates on file change)
+- **Glob/Grep**: Search results (1min TTL)
+- **WebFetch**: Web content (15min TTL)
+- **context7**: Library docs (1hr TTL)
+
+---
+
+## ⚡ Parallel Execution Patterns
+
+### When to Parallelize
+- Independent file reads (up to 10 concurrent)
+- Multiple searches across different paths
+- Multiple Task agents for independent work
+- Different MCP server queries
+
+### When to Keep Sequential
+- Git operations (add → commit → push)
+- Write/Edit to same file
+- Operations where output feeds next input
+
+See `~/.claude/documentation/PARALLEL_EXECUTION.md` for detailed patterns.
+
+---
+
+## 🛡️ Security Hooks Active
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| **prompt-injection-guard** | PreToolUse | Blocks injection attempts |
+| **context-compression** | PreCompact | Preserves important context |
+| **post-file-edit** | Edit/Write | Quick validation |
+| **pre-commit** | git commit | Full validation gate |
+
+---
+
+## 📚 Additional Skills
+
+| Skill | Trigger | Purpose |
+|-------|---------|---------|
+| **observability** | "metrics", "grafana" | Monitor PAI performance |
+| **mcp-integration** | "which mcp", "mcp help" | MCP auto-invocation rules |
+| **docker** | "veritas", "docker" | Manage Veritas containers |
+| **research** | "research", "investigate" | Multi-agent research |
+| **prompting** | "prompt", "improve prompt" | Prompt engineering |
