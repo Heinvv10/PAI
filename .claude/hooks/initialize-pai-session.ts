@@ -65,17 +65,18 @@ async function testStopHook() {
     return false;
   }
 
-  // Check if stop-hook is executable
+  // Check if stop-hook is executable (skip on Windows - .ts files don't need +x)
   try {
     const stats = statSync(stopHookPath);
-    const isExecutable = (stats.mode & 0o111) !== 0;
+    const isWindows = process.platform === 'win32';
+    const isExecutable = isWindows || (stats.mode & 0o111) !== 0;
 
     if (!isExecutable) {
       console.error('❌ Stop-hook exists but is NOT EXECUTABLE');
       return false;
     }
 
-    console.error('✅ Stop-hook found and is executable');
+    console.error('✅ Stop-hook found and ready');
 
     // Set initial tab title (customize with your AI's name via DA env var)
     const daName = process.env.DA || 'AI Assistant';
