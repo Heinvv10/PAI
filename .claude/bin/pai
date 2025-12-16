@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# PAI Launcher - Wrapper for Claude Code with auto-bootstrap
+#
+# This script runs the PAI bootstrap before starting Claude Code,
+# working around the hooks bug (#11544).
+#
+# Usage:
+#   pai [claude-code-args]
+#
+# Examples:
+#   pai                     # Start Claude with bootstrap
+#   pai --model opus        # Start with specific model
+#   pai /path/to/project    # Start in specific directory
+#
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  PAI Launcher                                                ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Run bootstrap
+echo "▸ Running PAI bootstrap..."
+bun "$HOME/.claude/hooks/pai-bootstrap-all.ts" start 2>&1
+
+BOOTSTRAP_EXIT=$?
+
+if [ $BOOTSTRAP_EXIT -eq 0 ]; then
+    echo ""
+    echo "✅ Bootstrap complete"
+    echo ""
+else
+    echo ""
+    echo "⚠️  Bootstrap had issues (exit code: $BOOTSTRAP_EXIT)"
+    echo "    Continuing anyway..."
+    echo ""
+fi
+
+# Run model routing status
+echo "▸ Model routing ready:"
+echo "   • Simple tasks → Haiku"
+echo "   • Standard tasks → Sonnet"
+echo "   • Complex tasks → Opus"
+echo ""
+
+# Start Claude Code with any passed arguments
+echo "▸ Starting Claude Code..."
+echo "────────────────────────────────────────────────────────────────"
+echo ""
+
+claude "$@"

@@ -1,0 +1,145 @@
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "cost_mode": "quality-first",
+  "description": "Conservative model routing configuration - Quality over cost savings",
+
+  "complexity_thresholds": {
+    "haiku_max": 25,
+    "sonnet_max": 75,
+    "opus_min": 76
+  },
+
+  "confidence_threshold": 0.7,
+  "fallback_model": "sonnet",
+  "enable_llm_fallback": false,
+  "llm_fallback_threshold": 0.6,
+
+  "model_mapping": {
+    "haiku": {
+      "model_id": "claude-3-5-haiku-20241022",
+      "display_name": "Claude 3.5 Haiku",
+      "tier": "FAST",
+      "cost_per_mtok": {
+        "input": 0.25,
+        "output": 1.25
+      },
+      "description": "Fast, economical model for simple tasks"
+    },
+    "sonnet": {
+      "model_id": "claude-sonnet-4-5-20250929",
+      "display_name": "Claude Sonnet 4.5",
+      "tier": "STANDARD",
+      "cost_per_mtok": {
+        "input": 3.0,
+        "output": 15.0
+      },
+      "description": "Balanced model for most development work (DEFAULT)"
+    },
+    "opus": {
+      "model_id": "claude-opus-4-5-20251101",
+      "display_name": "Claude Opus 4.5",
+      "tier": "ADVANCED",
+      "cost_per_mtok": {
+        "input": 15.0,
+        "output": 75.0
+      },
+      "description": "Advanced model for complex reasoning and critical tasks"
+    }
+  },
+
+  "manual_overrides": {
+    "use haiku": "haiku",
+    "force haiku": "haiku",
+    "use sonnet": "sonnet",
+    "force sonnet": "sonnet",
+    "use opus": "opus",
+    "force opus": "opus",
+    "think hard": "opus",
+    "think harder": "opus",
+    "ultrathink": "opus"
+  },
+
+  "thinking_budget_mapping": {
+    "think": 4096,
+    "think hard": 16384,
+    "think harder": 32768,
+    "ultrathink": 128000
+  },
+
+  "keyword_weights": {
+    "fast_keywords": {
+      "keywords": ["read", "show", "list", "status", "format", "lint", "check", "view", "display"],
+      "score_modifier": -20,
+      "description": "Simple, deterministic tasks"
+    },
+    "advanced_keywords": {
+      "keywords": [
+        "architecture",
+        "security audit",
+        "design system",
+        "optimize performance",
+        "think hard",
+        "complex analysis",
+        "evaluate tradeoffs"
+      ],
+      "score_modifier": 30,
+      "description": "Complex reasoning tasks"
+    }
+  },
+
+  "task_type_weights": {
+    "implementation": {
+      "patterns": ["implement", "create", "build", "develop"],
+      "score_modifier": 20,
+      "default_tier": "STANDARD"
+    },
+    "debugging": {
+      "patterns": ["debug", "fix", "solve", "investigate"],
+      "score_modifier": 15,
+      "default_tier": "STANDARD"
+    },
+    "optimization": {
+      "patterns": ["refactor", "optimize", "improve"],
+      "score_modifier": 25,
+      "default_tier": "STANDARD"
+    },
+    "analysis": {
+      "patterns": ["analyze", "review", "audit", "assess"],
+      "score_modifier": 10,
+      "default_tier": "STANDARD"
+    }
+  },
+
+  "logging": {
+    "decisions_file": "~/.claude/metrics/routing-decisions.jsonl",
+    "database_file": "~/.claude/metrics/routing-metrics.db",
+    "retention_days": 90,
+    "log_level": "info"
+  },
+
+  "monitoring": {
+    "success_rate_threshold": 0.95,
+    "accuracy_threshold": 0.90,
+    "max_retry_rate": 0.05,
+    "alert_on_quality_drop": true,
+    "daily_summary_enabled": true,
+    "weekly_optimization_enabled": true
+  },
+
+  "optimization": {
+    "auto_tune_thresholds": false,
+    "min_sample_size": 100,
+    "max_adjustment_per_week": 5,
+    "learning_rate": 0.1
+  },
+
+  "advanced": {
+    "enable_context_caching": false,
+    "enable_parallel_classification": false,
+    "hook_timeout_ms": 200,
+    "llm_timeout_ms": 2000,
+    "retry_on_failure": true,
+    "max_retries": 2
+  }
+}
