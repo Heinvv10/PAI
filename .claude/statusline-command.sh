@@ -20,20 +20,31 @@ LOCK_FILE="/tmp/.claude_ccusage.lock"
 CACHE_AGE=30   # 30 seconds for more real-time updates
 
 # Count items from specified directories
+# Check both user .claude and PAI .claude directories
 claude_dir="${PAI_DIR:-$HOME/.claude}"
+pai_dir="/home/hein/PAI/.claude"
+
 commands_count=0
 mcps_count=0
 fobs_count=0
 fabric_count=0
 
-# Count commands (optimized - direct ls instead of find)
+# Count commands from both locations
 if [ -d "$claude_dir/commands" ]; then
     commands_count=$(ls -1 "$claude_dir/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
 fi
+if [ -d "$pai_dir/commands" ] && [ "$claude_dir" != "$pai_dir" ]; then
+    pai_commands=$(ls -1 "$pai_dir/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    commands_count=$((commands_count + pai_commands))
+fi
 
-# Count MCPs from .mcp.json (single parse)
+# Count MCPs from .mcp.json - prefer PAI location
 mcp_names_raw=""
-if [ -f "$claude_dir/.mcp.json" ]; then
+if [ -f "$pai_dir/.mcp.json" ]; then
+    mcp_data=$(jq -r '.mcpServers | keys | join(" "), length' "$pai_dir/.mcp.json" 2>/dev/null)
+    mcp_names_raw=$(echo "$mcp_data" | head -1)
+    mcps_count=$(echo "$mcp_data" | tail -1)
+elif [ -f "$claude_dir/.mcp.json" ]; then
     mcp_data=$(jq -r '.mcpServers | keys | join(" "), length' "$claude_dir/.mcp.json" 2>/dev/null)
     mcp_names_raw=$(echo "$mcp_data" | head -1)
     mcps_count=$(echo "$mcp_data" | tail -1)
@@ -48,12 +59,17 @@ if [ -d "$services_dir" ]; then
 fi
 
 # Count Fabric patterns (optimized - count subdirectories)
-# Use bundled PAI fabric if available, fallback to system-wide installation
-fabric_patterns_dir="$claude_dir/skills/fabric/fabric-repo/patterns"
-if [ ! -d "$fabric_patterns_dir" ]; then
+# Check PAI location first, then user location, then system-wide
+fabric_patterns_dir=""
+if [ -d "$pai_dir/skills/fabric/fabric-repo/data/patterns" ]; then
+    fabric_patterns_dir="$pai_dir/skills/fabric/fabric-repo/data/patterns"
+elif [ -d "$claude_dir/skills/fabric/fabric-repo/data/patterns" ]; then
+    fabric_patterns_dir="$claude_dir/skills/fabric/fabric-repo/data/patterns"
+elif [ -d "${HOME}/.config/fabric/patterns" ]; then
     fabric_patterns_dir="${HOME}/.config/fabric/patterns"
 fi
-if [ -d "$fabric_patterns_dir" ]; then
+
+if [ -n "$fabric_patterns_dir" ] && [ -d "$fabric_patterns_dir" ]; then
     # Count immediate subdirectories only
     fabric_count=$(find "$fabric_patterns_dir" -maxdepth 1 -type d -not -path "$fabric_patterns_dir" 2>/dev/null | wc -l | tr -d ' ')
 fi
@@ -208,18 +224,74 @@ for mcp in $mcp_names_raw; do
     fi
 done
 
-# Output the full 3-line statusline
-# LINE 1 - PURPLE theme with all counts
-printf "${DA_DISPLAY_COLOR}${DA_NAME}${RESET}${LINE1_PRIMARY} here, running on ${MODEL_PURPLE}🧠 ${model_name}${RESET}${LINE1_PRIMARY} in ${DIR_COLOR}📁 ${dir_name}${RESET}${LINE1_PRIMARY}, wielding: ${RESET}${LINE1_PRIMARY}🔧 ${fobs_count} Services${RESET}${LINE1_PRIMARY}, ${RESET}${LINE1_PRIMARY}⚙️ ${commands_count} Commands${RESET}${LINE1_PRIMARY}, ${RESET}${LINE1_PRIMARY}🔌 ${mcps_count} MCPs${RESET}${LINE1_PRIMARY}, and ${RESET}${LINE1_PRIMARY}📚 ${fabric_count} Patterns${RESET}\n"
+# ==============================================================================
+# TWO-LINE STATUSLINE IMPLEMENTATION
+# ==============================================================================
+# Line 1: ccusage professional metrics (context, timing, costs, burn rate)
+# Line 2: PAI-specific metrics (project, git, infrastructure counts)
 
-# LINE 2 - BLUE theme with MCP names
-printf "${LINE2_PRIMARY}🔌 MCPs${RESET}${LINE2_PRIMARY}${SEPARATOR_COLOR}: ${RESET}${mcp_names_formatted}${RESET}\n"
+# --------------------------------------------------
+# LINE 1: Call ccusage statusline
+# --------------------------------------------------
+# Pass the JSON input to ccusage for professional metrics display
+# Includes: Model, Context %, Session time, Costs, Block timer, Burn rate
+line1_output=$(echo "$input" | bunx ccusage statusline \
+  --visual-burn-rate emoji \
+  --context-low-threshold 50 \
+  --context-medium-threshold 80 \
+  --cost-source auto 2>/dev/null)
 
-# LINE 3 - GREEN theme with tokens and cost (show cached or N/A)
-# If we have cached data but it's empty, still show N/A
-tokens_display="${daily_tokens:-N/A}"
-cost_display="${daily_cost:-N/A}"
-if [ -z "$daily_tokens" ]; then tokens_display="N/A"; fi
-if [ -z "$daily_cost" ]; then cost_display="N/A"; fi
+# Prepend DA name to ccusage output
+if [ -n "$line1_output" ]; then
+  line1="${DA_DISPLAY_COLOR}🤖 ${DA_NAME}${RESET} | ${line1_output}"
+else
+  # Fallback if ccusage fails
+  line1="${DA_DISPLAY_COLOR}${DA_NAME}${RESET}${LINE1_PRIMARY} | ${MODEL_PURPLE}🧠 ${model_name}${RESET} | ${DIR_COLOR}📁 ${dir_name}${RESET}"
+fi
 
-printf "${LINE3_PRIMARY}💎 Total Tokens${RESET}${LINE3_PRIMARY}${SEPARATOR_COLOR}: ${RESET}${LINE3_ACCENT}${tokens_display}${RESET}${LINE3_PRIMARY}  Total Cost${RESET}${LINE3_PRIMARY}${SEPARATOR_COLOR}: ${RESET}${COST_COLOR}${cost_display}${RESET}\n"
+# --------------------------------------------------
+# LINE 2: PAI Metrics + Enhanced Git Stats
+# --------------------------------------------------
+
+# Get git information
+git_branch=$(git branch --show-current 2>/dev/null)
+git_display=""
+
+if [ -n "$git_branch" ]; then
+  # Extract line changes from JSON input
+  lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+  lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+  # Get count of uncommitted changes
+  uncommitted=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+
+  # Determine branch color
+  if [ "$git_branch" = "main" ] || [ "$git_branch" = "master" ]; then
+    branch_color="$BRIGHT_RED"
+  else
+    branch_color="$BRIGHT_CYAN"
+  fi
+
+  # Build git display
+  git_display="${branch_color}🌿 ${git_branch}${RESET}"
+
+  # Add uncommitted files if any
+  if [ "$uncommitted" -gt 0 ]; then
+    git_display="${git_display}${LINE2_ACCENT} • ${uncommitted} files${RESET}"
+  fi
+
+  # Add line changes
+  git_display="${git_display}${LINE2_PRIMARY} (+${lines_added} -${lines_removed})${RESET}"
+else
+  git_display="${LINE2_PRIMARY}🌿 no-git${RESET}"
+fi
+
+# Build Line 2 with PAI metrics
+# Note: Use printf with %s for dir_name to avoid variable expansion issues
+line2_prefix=$(printf "${DIR_COLOR}📁 %s${RESET}" "$dir_name")
+line2="${line2_prefix}${LINE2_PRIMARY} | ${git_display}${LINE2_PRIMARY} | ${RESET}${LINE2_PRIMARY}🔧 ${fobs_count} Services${RESET}${LINE2_PRIMARY} | ${RESET}${LINE2_PRIMARY}⚙️ ${commands_count} Commands${RESET}${LINE2_PRIMARY} | ${RESET}${LINE2_PRIMARY}🔌 ${mcps_count} MCPs${RESET}${LINE2_PRIMARY} | ${RESET}${LINE2_PRIMARY}📚 ${fabric_count} Patterns${RESET}"
+
+# --------------------------------------------------
+# Output both lines
+# --------------------------------------------------
+printf "%b\n%b\n" "$line1" "$line2"

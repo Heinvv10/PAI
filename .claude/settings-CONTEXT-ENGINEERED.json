@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "MCP_API_KEY": "REDACTED",
+    "DISABLE_INTERLEAVED_THINKING": "true",
+    "DA": "Jarvis",
+    "PAI_DIR": "C:\\Users\\HeinvanVuuren\\.claude"
+  },
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "LS(*)",
+      "WebFetch(domain:*)",
+      "WebSearch",
+      "NotebookRead(*)",
+      "NotebookEdit(*)",
+      "TodoWrite(*)",
+      "ExitPlanMode(*)",
+      "Task(*)",
+      "mcp__*"
+    ],
+    "deny": [
+      "Bash(diskutil partitionDisk)",
+      "Bash(diskutil eraseDisk)",
+      "Bash(diskutil eraseVolume)",
+      "Bash(diskutil reformat)",
+      "Bash(diskutil zeroDisk)",
+      "Bash(diskutil appleRAID)",
+      "Bash(diskutil randomDisk)",
+      "Bash(diskutil coreStorage)",
+      "Bash(diskutil cs)",
+      "Bash(diskutil disableJournal)",
+      "Bash(diskutil resetFusion)",
+      "Bash(diskutil disableOwnership)",
+      "Bash(diskutil apfs deleteContainer)",
+      "Bash(diskutil apfs eraseVolume)",
+      "Bash(diskutil apfs decryptVolume)",
+      "Bash(diskutil apfs changePassphrase)",
+      "Bash(diskutil apfs deleteVolume)",
+      "Bash(diskutil apfs deleteVolumeGroup)",
+      "Bash(diskutil apfs deleteSnapshot)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf $HOME)",
+      "Bash(rm -rf $PAI_HOME)",
+      "Bash(rm -rf $PAI_DIR)",
+      "Bash(sudo rm -rf /)",
+      "Bash(sudo rm -rf /*)",
+      "Bash(fork bomb)",
+      "Bash(dd if=/dev/zero of=/dev/sda)",
+      "Bash(mkfs.ext4 /dev/sda)",
+      "Bash( /dev/sda)",
+      "Bash(> /dev/sda)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [],
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\load-core-context.ts",
+            "description": "Load PAI.md core context"
+          },
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\initialize-pai-session.ts",
+            "description": "Initialize PAI session (voice, tab title)"
+          },
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\content-scanner-hook.ts",
+            "description": "Scan for new AI/coding content"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\smart-context-loader.ts",
+            "description": "🧠 CONTEXT ENGINEERING: Analyze prompt and suggest relevant protocols (saves ~10k tokens)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\stop-hook.ts",
+            "description": "Voice notifications and tab title updates"
+          },
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\memory-maintenance-hook.ts",
+            "description": "💾 CONTEXT ENGINEERING: Update memory system for session persistence"
+          }
+        ]
+      }
+    ],
+    "Edit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "typescript",
+            "path": "C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\post-file-edit.ts"
+          }
+        ]
+      }
+    ],
+    "Write": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "typescript",
+            "path": "C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\post-file-edit.ts"
+          }
+        ]
+      }
+    ],
+    "MultiEdit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "typescript",
+            "path": "C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\post-file-edit.ts"
+          }
+        ]
+      }
+    ],
+    "PreBash": [
+      {
+        "matcher": "git commit*",
+        "hooks": [
+          {
+            "type": "typescript",
+            "path": "C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\pre-commit.ts"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "typescript",
+            "path": "C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\post-tool-use.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\token-tracker.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\tool-cache.ts"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\prompt-injection-guard.ts"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\hooks\\context-compression-hook.ts"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"C:\\Jarvis\\AI Workspace\\Personal_AI_Infrastructure\\.claude\\statusline-command.sh\"",
+    "padding": 0
+  },
+  "feedbackSurveyState": {
+    "lastShownTime": 1754071370324
+  }
+}
