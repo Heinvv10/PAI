@@ -1,0 +1,442 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@1.0.31"
+      ],
+      "env": {
+        "CLIENT_IP_ENCRYPTION_KEY": "pai-context7-key-2024"
+      }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    }
+  },
+  "env": {
+    "MCP_API_KEY": "REDACTED",
+    "DISABLE_INTERLEAVED_THINKING": "true",
+    "DA": "PAI",
+    "PAI_DIR": "$HOME/.claude",
+    "DA_COLOR": "purple",
+    "PAI_META_PROMPT_ENABLED": "true",
+    "PAI_META_PROMPT_ARCHIVAL": "true",
+    "PAI_META_PROMPT_MIN_CLARITY": "6"
+  },
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Bash(bun *)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "LS(*)",
+      "WebFetch(domain:*)",
+      "WebSearch",
+      "NotebookRead(*)",
+      "NotebookEdit(*)",
+      "TodoWrite(*)",
+      "ExitPlanMode(*)",
+      "Task(*)",
+      "mcp__*"
+    ],
+    "deny": [
+      "Bash(diskutil partitionDisk)",
+      "Bash(diskutil eraseDisk)",
+      "Bash(diskutil eraseVolume)",
+      "Bash(diskutil reformat)",
+      "Bash(diskutil zeroDisk)",
+      "Bash(diskutil appleRAID)",
+      "Bash(diskutil randomDisk)",
+      "Bash(diskutil coreStorage)",
+      "Bash(diskutil cs)",
+      "Bash(diskutil disableJournal)",
+      "Bash(diskutil resetFusion)",
+      "Bash(diskutil disableOwnership)",
+      "Bash(diskutil apfs deleteContainer)",
+      "Bash(diskutil apfs eraseVolume)",
+      "Bash(diskutil apfs decryptVolume)",
+      "Bash(diskutil apfs changePassphrase)",
+      "Bash(diskutil apfs deleteVolume)",
+      "Bash(diskutil apfs deleteVolumeGroup)",
+      "Bash(diskutil apfs deleteSnapshot)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf $HOME)",
+      "Bash(rm -rf $PAI_HOME)",
+      "Bash(rm -rf $PAI_DIR)",
+      "Bash(sudo rm -rf /)",
+      "Bash(sudo rm -rf /*)",
+      "Bash(fork bomb)",
+      "Bash(dd if=/dev/zero of=/dev/sda)",
+      "Bash(mkfs.ext4 /dev/sda)",
+      "Bash( /dev/sda)",
+      "Bash(> /dev/sda)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type PreToolUse"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/prompt-injection-guard.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__Ref__*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/ref-tools-integration.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/pre-file-write.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "EnterPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/plan-mode-model-switcher.ts enter"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type PostToolUse"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/token-tracker.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-prompt-archival.ts"
+          },
+          {
+            "type": "typescript",
+            "path": "$HOME/.claude/hooks/post-tool-use.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/tool-cache.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-research-trigger.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-skill-creator.ts"
+          },
+          {
+            "type": "typescript",
+            "path": "$HOME/.claude/hooks/post-file-edit.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/agent-updater.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-update-project-knowledge.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/docker-agents.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/plan-mode-model-switcher.ts exit"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-session-summary.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type SessionEnd"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/learn-and-update.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/session-tracker.ts stop"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/proactive-scanner.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/model-router.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/load-veritas-context.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/load-dynamic-requirements.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/update-tab-titles.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-meta-prompt-clarification.ts"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/test-hook.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/ref-tools-integration.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/mcp-auto-reconnect.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/load-core-context.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-project-setup.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-generate-expertise.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/expert-load.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/load-project-memory.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/mcp-health-checker.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/initialize-pai-session.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/pai-auto-bootstrap.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/on-session-start.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/proactive-scanner.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/auto-generate-project-knowledge.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type SessionStart"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/session-tracker.ts start"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/content-scanner-hook.ts"
+          }
+        ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/cache-expiry-checker.ts"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/stop-hook.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type Stop"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/expert-self-improve.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/memory-maintenance-hook.ts"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/subagent-stop-hook.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type SubagentStop"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/context-compression-hook.ts"
+          },
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/capture-all-events.ts --event-type PreCompact"
+          }
+        ]
+      }
+    ],
+    "PreBash": [
+      {
+        "matcher": "git commit*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun $HOME/.claude/hooks/expert-self-improve.ts"
+          },
+          {
+            "type": "typescript",
+            "path": "$HOME/.claude/hooks/pre-commit.ts"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash $HOME/.claude/statusline-command.sh"
+  },
+  "alwaysThinkingEnabled": false,
+  "feedbackSurveyState": {
+    "lastShownTime": 1754071370324
+  },
+  "model": "sonnet"
+}
