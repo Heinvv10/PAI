@@ -19,7 +19,7 @@
 [![PAI Video](https://img.shields.io/badge/🎥_Watch-PAI_Video-6B46C1)](https://youtu.be/iKwRWwabkEc)
 
 
-**[Features](#-key-features)** • **[Quick Start](#-quick-start)** • **[Documentation](#-documentation)** • **[Examples](#-examples)** • **[Community](#-community)**
+**[Features](#-key-features)** • **[Quick Start](#-quick-start)** • **[Global Activation](#-pai-global-activation--new-pc-setup)** • **[Documentation](#-documentation)** • **[Examples](#-examples)** • **[Community](#-community)**
 
 </div>
 
@@ -800,6 +800,196 @@ DA_COLOR="purple"                       # Display color (purple, blue, green, cy
 
 > [!TIP]
 > **Why PAI_DIR is Important:** The PAI_DIR variable makes the entire PAI system portable and installation-agnostic. All commands, skills, and hooks reference `${PAI_DIR}` instead of hardcoded paths. This means you can install PAI anywhere on your system, and as long as PAI_DIR points to your PAI repository root, everything will work seamlessly.
+
+---
+
+## 🌐 **PAI Global Activation & New PC Setup**
+
+> [!TIP]
+> **Want PAI activated globally across ALL projects?** Use the global CLAUDE.md trigger system for instant PAI access anywhere.
+
+### 🚀 **Global Activation System**
+
+PAI can be configured for **global activation** so it's available in every project without manual setup. This is achieved through a two-tier architecture:
+
+#### **How It Works**
+
+```
+┌─────────────────────────────────────────────┐
+│ Claude Code CLI                             │
+│ ┌─────────────────────────────────────────┐ │
+│ │ Global Context                          │ │
+│ │ ← C:\Jarvis\CLAUDE.md (or custom path) │ │
+│ └─────────────────────────────────────────┘ │
+│                                             │
+│ ┌─────────────────────────────────────────┐ │
+│ │ User Configuration                      │ │
+│ │ ← ~/.claude/settings.json               │ │
+│ │   ├── MCP Servers                       │ │
+│ │   ├── Skills Paths                      │ │
+│ │   └── Hooks & Commands                  │ │
+│ └─────────────────────────────────────────┘ │
+│                                             │
+│ Works in ANY project! 🎯                   │
+└─────────────────────────────────────────────┘
+```
+
+**1. Global Trigger File**: `C:\Jarvis\CLAUDE.md` (Windows) or `/path/to/CLAUDE.md` (macOS/Linux)
+   - Contains universal PAI triggers and protocols
+   - Activated via Claude Desktop config: `claude_desktop_config.json`
+   - Available in **every** Claude Code session automatically
+
+**2. User Configuration**: `~/.claude/` directory
+   - `settings.json` → MCP servers, paths, configurations
+   - `skills/` → Your PAI capabilities
+   - `protocols/` → Quality standards (NLNH, DGTS, etc.)
+   - `memories/` → Persistent session context
+
+#### **Global Triggers**
+
+Once configured, these triggers work in **any project**:
+
+| Trigger | Purpose | What It Does |
+|---------|---------|--------------|
+| `RYR` | Remember Your Rules | Loads all PAI rules and protocols |
+| `Veritas` | Truth-Enforcing Mode | Activates NLNH protocol, >95% accuracy enforcement |
+| `Archon` | Universal Coding Assistant | Project-specific agents, zero-error enforcement |
+| `gfg` | Go For Gold | Autonomous mode with continuous operation |
+
+**Example:**
+```bash
+# In ANY project directory
+claude
+
+# Type any trigger:
+> RYR
+> Veritas
+> Archon
+```
+
+PAI immediately activates with full context, skills, and protocols!
+
+### 📦 **Transferring PAI to a New PC**
+
+Moving your entire PAI setup to a new machine? We've got you covered with automated setup scripts and comprehensive documentation.
+
+#### **Quick Transfer (10 minutes)**
+
+```powershell
+# 1. Clone repo on new PC
+cd C:\Jarvis\AI Workspace
+git clone [YOUR_GITHUB_REPO_URL]
+
+# 2. Run automated setup
+cd Personal_AI_Infrastructure
+.\setup-new-pc.ps1
+
+# 3. Set API tokens
+[System.Environment]::SetEnvironmentVariable("GITHUB_TOKEN", "ghp_xxxxx", "User")
+[System.Environment]::SetEnvironmentVariable("HOSTINGER_API_TOKEN", "xxxxx", "User")
+
+# 4. Restart terminal & test
+claude
+# Type: RYR
+```
+
+#### **What Gets Transferred**
+
+✅ **Essential Components**:
+- Global trigger file (`CLAUDE.md`)
+- Command scripts (Python triggers)
+- Skills system (`~/.claude/skills/`)
+- Protocols (`~/.claude/protocols/`)
+- Settings & MCP configurations
+- Hooks & automation
+
+❌ **Not Transferred** (Auto-generated):
+- `node_modules/`
+- Session history & cache
+- Runtime state files
+
+#### **Transfer Documentation**
+
+We provide three comprehensive guides:
+
+| Guide | Purpose | Time to Complete |
+|-------|---------|------------------|
+| **[PAI-NEW-PC-SETUP.md](./PAI-NEW-PC-SETUP.md)** | Step-by-step manual setup with detailed explanations | 30 minutes |
+| **[setup-new-pc.ps1](./setup-new-pc.ps1)** | Automated PowerShell script for instant setup | 10 minutes |
+| **[PAI-TRANSFER-CHECKLIST.md](./PAI-TRANSFER-CHECKLIST.md)** | Quick reference checklist and troubleshooting | 5 minutes |
+
+**Before Transfer (Old PC)**:
+1. Commit PAI files to GitHub
+2. Save API tokens separately (password manager)
+3. Optional: Export memories for historical context
+
+**After Transfer (New PC)**:
+1. Clone repository
+2. Run `setup-new-pc.ps1` (automated) or follow manual guide
+3. Configure API tokens
+4. Test global activation: Type "RYR"
+
+### 🔧 **Configuration Files**
+
+#### **Global Instructions (Claude Desktop)**
+
+**Location**: `C:\Users\[USERNAME]\AppData\Roaming\Claude\claude_desktop_config.json`
+
+```json
+{
+  "globalInstructions": {
+    "instructionsPath": "C:\\Jarvis\\CLAUDE.md"
+  }
+}
+```
+
+#### **User Settings**
+
+**Location**: `~/.claude/settings.json`
+
+Contains:
+- MCP server configurations
+- Skill paths and settings
+- Hook configurations
+- Environment-specific settings
+
+### 📋 **Quick Reference: Setup Checklist**
+
+**New PC Activation Checklist**:
+- [ ] Repository cloned to desired location
+- [ ] Global `CLAUDE.md` in place
+- [ ] `~/.claude/` directory structure created
+- [ ] Settings, skills, protocols copied
+- [ ] API tokens configured in environment variables
+- [ ] Claude Desktop config points to `CLAUDE.md`
+- [ ] Test: Type "RYR" in any project → Rules load ✅
+
+### 🎯 **Success Criteria**
+
+PAI is fully activated globally when:
+
+1. ✅ Type "RYR" in **any** Claude Code session → Rules load
+2. ✅ Skills accessible via natural language
+3. ✅ Protocols enforce quality standards
+4. ✅ Memory persists across sessions
+5. ✅ MCP servers respond to queries
+
+### 💡 **Why Global Activation?**
+
+**Benefits**:
+- 🌍 **Universal Access**: PAI available in every project
+- 🎯 **Zero Setup**: No per-project configuration needed
+- 🔄 **Consistency**: Same capabilities everywhere
+- 📦 **Portability**: Easy transfer to new machines
+- 🧠 **Memory**: Context persists across all work
+
+**Perfect For**:
+- Developers working across multiple projects
+- Users who want consistent AI assistance everywhere
+- Teams standardizing on PAI infrastructure
+- Anyone moving between machines frequently
+
+📖 **[Full Setup Documentation →](./PAI-NEW-PC-SETUP.md)**
 
 ---
 
