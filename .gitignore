@@ -61,3 +61,9 @@ out/
 private/
 secrets/
 credentials/
+
+# Claude Code local settings (use global ~/.claude/settings.json instead)
+.claude/settings.json
+.claude/settings.local.json
+.claude/.mcp.json
+.claude/settings-*.json

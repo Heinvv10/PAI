@@ -1334,7 +1334,9 @@ PAI is MIT licensed. See [LICENSE](./LICENSE) for details.
 
 <br/>
 
-**Created by [Daniel Miessler](https://danielmiessler.com)**
+**Personal AI Infrastructure**
+
+*Forked and customized from the open-source PAI project*
 
 📧 **[Newsletter](https://newsletter.danielmiessler.com)** • 📝 **[Blog](https://danielmiessler.com/blog)** • 💼 **[LinkedIn](https://linkedin.com/in/danielmiessler)** • 🎬 **[YouTube](https://www.youtube.com/@unsupervised-learning)**
 
