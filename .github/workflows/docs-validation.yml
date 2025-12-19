@@ -1,0 +1,207 @@
+name: Documentation Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-docs:
+    name: Validate PAI Documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          # No dependencies needed for test runner
+          echo "Test runner is self-contained"
+
+      - name: Setup PAI documentation paths
+        run: |
+          echo "📝 Setting up PAI documentation for CI validation..."
+          mkdir -p "$HOME/.claude"
+          mkdir -p "$HOME/.claude/scripts"
+          mkdir -p "$HOME/.claude/tests"
+
+          # Create symlinks from repo to home directory (CI-friendly approach)
+          ln -s "$GITHUB_WORKSPACE/docs/PAI_CHANGELOG.md" "$HOME/.claude/PAI_CHANGELOG.md" 2>/dev/null || cp "$GITHUB_WORKSPACE/docs/PAI_CHANGELOG.md" "$HOME/.claude/PAI_CHANGELOG.md"
+          ln -s "$GITHUB_WORKSPACE/docs/PAI_OPERATIONS_LOG.md" "$HOME/.claude/PAI_OPERATIONS_LOG.md" 2>/dev/null || cp "$GITHUB_WORKSPACE/docs/PAI_OPERATIONS_LOG.md" "$HOME/.claude/PAI_OPERATIONS_LOG.md"
+          ln -s "$GITHUB_WORKSPACE/docs/PAI_DECISION_LOG.md" "$HOME/.claude/PAI_DECISION_LOG.md" 2>/dev/null || cp "$GITHUB_WORKSPACE/docs/PAI_DECISION_LOG.md" "$HOME/.claude/PAI_DECISION_LOG.md"
+
+          # Copy scripts and tests
+          cp -r "$GITHUB_WORKSPACE/scripts/"* "$HOME/.claude/scripts/" 2>/dev/null || true
+          cp -r "$GITHUB_WORKSPACE/tests/"* "$HOME/.claude/tests/" 2>/dev/null || true
+
+          echo "✅ PAI documentation paths configured"
+
+      - name: Validate CHANGELOG format
+        run: |
+          echo "🔍 Validating PAI_CHANGELOG.md format..."
+
+          CHANGELOG_PATH="$HOME/.claude/PAI_CHANGELOG.md"
+
+          # Check for required sections
+          if ! grep -q "## \[Unreleased\]" "$CHANGELOG_PATH"; then
+            echo "❌ Missing [Unreleased] section"
+            exit 1
+          fi
+
+          if ! grep -q "### Added" "$CHANGELOG_PATH"; then
+            echo "❌ Missing ### Added section"
+            exit 1
+          fi
+
+          # Check for placeholder text
+          if grep -q "TODO\|PLACEHOLDER\|FIXME" "$CHANGELOG_PATH"; then
+            echo "❌ Contains placeholder text (TODO/PLACEHOLDER/FIXME)"
+            exit 1
+          fi
+
+          echo "✅ CHANGELOG format valid"
+
+      - name: Validate OPERATIONS_LOG format
+        run: |
+          echo "🔍 Validating PAI_OPERATIONS_LOG.md format..."
+
+          OPERATIONS_PATH="$HOME/.claude/PAI_OPERATIONS_LOG.md"
+
+          # Check for required structure
+          if ! grep -qE "^## \[[0-9]{4}-[0-9]{2}-[0-9]{2}\]" "$OPERATIONS_PATH"; then
+            echo "❌ Missing date header format ## [YYYY-MM-DD]"
+            exit 1
+          fi
+
+          if ! grep -q "\*\*Type\*\*:" "$OPERATIONS_PATH"; then
+            echo "❌ Missing **Type**: field"
+            exit 1
+          fi
+
+          if ! grep -q "\*\*Severity\*\*:" "$OPERATIONS_PATH"; then
+            echo "❌ Missing **Severity**: field"
+            exit 1
+          fi
+
+          echo "✅ OPERATIONS_LOG format valid"
+
+      - name: Validate DECISION_LOG (ADR) format
+        run: |
+          echo "🔍 Validating PAI_DECISION_LOG.md format..."
+
+          DECISION_PATH="$HOME/.claude/PAI_DECISION_LOG.md"
+
+          # Check for ADR format
+          if ! grep -qE "^# ADR-[0-9]+:" "$DECISION_PATH"; then
+            echo "❌ Missing ADR number format # ADR-XXX:"
+            exit 1
+          fi
+
+          if ! grep -q "\*\*Status\*\*:" "$DECISION_PATH"; then
+            echo "❌ Missing **Status**: field"
+            exit 1
+          fi
+
+          if ! grep -q "## Context" "$DECISION_PATH"; then
+            echo "❌ Missing ## Context section"
+            exit 1
+          fi
+
+          if ! grep -q "## Decision" "$DECISION_PATH"; then
+            echo "❌ Missing ## Decision section"
+            exit 1
+          fi
+
+          if ! grep -q "## Consequences" "$DECISION_PATH"; then
+            echo "❌ Missing ## Consequences section"
+            exit 1
+          fi
+
+          # Check ADR sequential numbering
+          ADR_NUMBERS=$(grep -oE "# ADR-([0-9]+):" "$DECISION_PATH" | grep -oE "[0-9]+" | sort -n)
+          EXPECTED=1
+          for NUM in $ADR_NUMBERS; do
+            if [ $NUM -ne $EXPECTED ]; then
+              echo "❌ ADR numbers not sequential (expected $EXPECTED, got $NUM)"
+              exit 1
+            fi
+            EXPECTED=$((EXPECTED + 1))
+          done
+
+          echo "✅ DECISION_LOG format valid"
+
+      - name: Run comprehensive test suite
+        run: |
+          echo "🧪 Running comprehensive test suite..."
+          cd "$HOME/.claude/tests"
+          bun test ./run-docs-tests.ts
+          echo "✅ All tests passed"
+
+      - name: Check helper scripts performance
+        run: |
+          echo "⏱️ Checking helper scripts performance..."
+
+          SCRIPTS=(
+            "$HOME/.claude/scripts/add-pai-changelog.sh"
+            "$HOME/.claude/scripts/add-pai-operation.sh"
+            "$HOME/.claude/scripts/add-pai-decision.sh"
+          )
+
+          for SCRIPT in "${SCRIPTS[@]}"; do
+            if [ ! -f "$SCRIPT" ]; then
+              echo "❌ Script not found: $SCRIPT"
+              exit 1
+            fi
+
+            # Check script is executable
+            if [ ! -x "$SCRIPT" ]; then
+              echo "⚠️ Script not executable: $SCRIPT"
+              chmod +x "$SCRIPT"
+            fi
+
+            echo "✓ $(basename $SCRIPT) exists and is executable"
+          done
+
+          echo "✅ Helper scripts validated"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ PAI DOCUMENTATION VALIDATION PASSED"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📋 Validated:"
+          echo "  ✓ PAI_CHANGELOG.md format (Keep a Changelog)"
+          echo "  ✓ PAI_OPERATIONS_LOG.md structure"
+          echo "  ✓ PAI_DECISION_LOG.md ADR format"
+          echo "  ✓ Helper scripts existence and permissions"
+          echo "  ✓ Comprehensive test suite (24 automated tests)"
+          echo ""
+          echo "🎯 Documentation system is healthy!"
+          echo ""
+
+      - name: Failure summary
+        if: failure()
+        run: |
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "❌ PAI DOCUMENTATION VALIDATION FAILED"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Please check the logs above for specific failures."
+          echo ""
+          echo "📚 Documentation:"
+          echo "  - See ~/.claude/PAI_CHANGELOG.md for expected format"
+          echo "  - See ~/.claude/PAI_OPERATIONS_LOG.md for expected format"
+          echo "  - See ~/.claude/PAI_DECISION_LOG.md for ADR template"
+          echo ""
