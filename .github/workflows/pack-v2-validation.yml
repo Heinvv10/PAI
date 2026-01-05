@@ -56,17 +56,46 @@ jobs:
     strategy:
       matrix:
         skill:
-          - pai-diagnostics
-          - upgrade
+          - CORE
           - agent-observability
-          - fabric
-          - research
           - alex-hormozi-pitch
+          - apex-ui
+          - apex-ui-ux
+          - async-orchestration
+          - auto
+          - boss-ui-ux
+          - claude-agent-sdk
+          - content-scanner
           - create-skill
-          - mcp-builder
+          - docx
+          - example-skill
+          - fabric
           - ffuf
-          - python-agent-patterns
+          - input-leap-manager
+          - kai
+          - mcp-builder
+          - mcp-troubleshooter
           - meta-prompting
+          - mt5-trading
+          - pai-diagnostics
+          - pdf
+          - pptx
+          - proactive-scanner
+          - project-codebase
+          - prompt-enhancement
+          - prompting
+          - python-agent-patterns
+          - ref-tools
+          - research
+          - session-persistence
+          - skill-creator-anthropic
+          - typescript-architectural-fixer
+          - typescript-error-fixer
+          - upgrade
+          - validation
+          - veritas
+          - webapp-testing
+          - xlsx
 
     steps:
       - name: Checkout repository
@@ -166,10 +195,10 @@ jobs:
           SKILL_COUNT=$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "Found $SKILL_COUNT skills in skills/ directory"
 
-          if [ "$SKILL_COUNT" -ne 11 ]; then
-            echo "⚠️  Expected 11 skills, found $SKILL_COUNT"
+          if [ "$SKILL_COUNT" -ne 40 ]; then
+            echo "⚠️  Expected 40 skills, found $SKILL_COUNT"
           else
-            echo "✅ All 11 expected skills present"
+            echo "✅ All 40 expected skills present"
           fi
 
       - name: Generate validation summary
