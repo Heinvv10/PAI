@@ -1,0 +1,405 @@
+# PAI - Personal AI Infrastructure
+# .gitignore for .claude directory
+
+# ============================================================================
+# SENSITIVE FILES - NEVER COMMIT
+# ============================================================================
+
+# API Keys and Credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+credentials*.json
+secrets.json
+secrets*.json
+*-credentials.json
+auth.json
+token.json
+*.token
+
+# SSH Keys
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Cloud Provider Credentials
+.aws/
+.gcp/
+.azure/
+google-credentials.json
+aws-credentials.json
+
+# Database Credentials
+database.json
+db-config.json
+*.db-credentials
+
+# Session Data
+sessions/
+*.session
+.session-*
+
+# Personal Information
+personal.json
+contacts.json
+private-notes.md
+*.private
+
+# ============================================================================
+# NODE.JS / NPM
+# ============================================================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Package manager lock files (keep for production, exclude for libraries)
+# Uncomment if you want to exclude them:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ============================================================================
+# TYPESCRIPT / JAVASCRIPT
+# ============================================================================
+
+# Compiled output
+dist/
+build/
+out/
+*.js.map
+*.d.ts.map
+
+# TypeScript cache
+*.tsbuildinfo
+.tsc/
+
+# ESLint cache
+.eslintcache
+
+# ============================================================================
+# PYTHON
+# ============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+virtualenv/
+
+# Python distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.manifest
+*.spec
+
+# PyInstaller
+*.spec
+
+# Python testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# Test artifacts
+test-results/
+test-output/
+*.test.log
+
+# ============================================================================
+# BUILD ARTIFACTS
+# ============================================================================
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================================================
+# DATABASES
+# ============================================================================
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Database dumps
+*.sql
+*.dump
+
+# ============================================================================
+# CACHES
+# ============================================================================
+
+# General cache directories
+.cache/
+cache/
+tmp/
+temp/
+.tmp/
+.temp/
+
+# OS cache
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================================================
+# EDITOR / IDE
+# ============================================================================
+
+# VSCode
+.vscode/
+!.vscode/settings.json.example
+!.vscode/extensions.json.example
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+.*.sw[a-z]
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# OPERATING SYSTEM
+# ============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================================================
+# VERSION CONTROL
+# ============================================================================
+
+# Git merge conflicts
+*.orig
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*_BACKUP_*
+*_BASE_*
+*_LOCAL_*
+*_REMOTE_*
+
+# ============================================================================
+# SKILL-SPECIFIC EXCLUSIONS
+# ============================================================================
+
+# Agent Observability
+skills/agent-observability/src/apps/client/dist/
+skills/agent-observability/src/apps/server/dist/
+skills/agent-observability/src/history-structure/raw-outputs/*.jsonl
+!skills/agent-observability/src/history-structure/raw-outputs/EXAMPLE.jsonl
+skills/agent-observability/*.sqlite
+skills/agent-observability/*.db
+
+# Fabric
+skills/fabric/src/fabric-repo/.env
+skills/fabric/src/fabric-repo/config.yaml
+skills/fabric/src/fabric-repo/*.db
+
+# Research skill outputs
+skills/research/outputs/
+skills/research/results/
+
+# MCP Builder test servers
+skills/mcp-builder/test-servers/
+skills/mcp-builder/generated/
+
+# FFUF wordlists and results
+skills/ffuf/wordlists/*.txt
+!skills/ffuf/wordlists/example.txt
+skills/ffuf/results/
+skills/ffuf/reports/
+
+# Python Agent Patterns examples
+skills/python-agent-patterns/examples/*/venv/
+skills/python-agent-patterns/examples/*/.env
+
+# ============================================================================
+# TEMPORARY FILES
+# ============================================================================
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+
+# Lock files (temporary)
+*.lock
+!package-lock.json
+!yarn.lock
+!pnpm-lock.yaml
+
+# Swap files
+*.swp
+*.swo
+
+# ============================================================================
+# DOCUMENTATION BUILD ARTIFACTS
+# ============================================================================
+
+# Generated documentation
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
+# Docusaurus
+.docusaurus/
+.cache-loader/
+
+# ============================================================================
+# PAI-SPECIFIC
+# ============================================================================
+
+# Local development settings
+settings.local.json
+settings.*.local.json
+config.local.json
+
+# User-specific customizations
+*.user.json
+*.user.md
+
+# Archived/deprecated files (keep only in git history)
+*DEPRECATED*
+*LEGACY*
+*OLD*
+
+# Session transcripts (too large, sensitive)
+transcripts/
+*.transcript
+conversation-*.md
+
+# Local testing artifacts
+test-output/
+validation-output/
+*.test-output
+
+# ============================================================================
+# KEEP THESE FILES (Explicit includes)
+# ============================================================================
+
+# Don't ignore these important files
+!.gitignore
+!.github/
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+
+# Keep example/template files
+!*.example
+!*.template
+!*-template.*
+!example-*
+
+# Keep test fixtures
+!tests/fixtures/
+!tests/mocks/
+
+# ============================================================================
+# PROJECT-SPECIFIC NOTES
+# ============================================================================
+
+# Add any project-specific exclusions below:
+# - User-specific skill configurations
+# - Local override files
+# - Generated reports (if too large)
+
+# End of .gitignore
