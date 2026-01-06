@@ -11,7 +11,24 @@ Agents were creating fake tests that always pass, commenting out validation rule
 
 ---
 
-## Gaming Patterns Detected (60+)
+## Gaming Patterns Detected (80+)
+
+### Security Bypass Patterns (NEW - CRITICAL)
+```typescript
+// These will BLOCK agents immediately - CRITICAL SEVERITY:
+// damage_control disabled     # Commented security checks
+# security_check removed       # Commented security checks
+hooks: []                      # Empty hooks array (security disabled)
+DAMAGE_CONTROL_ENABLED = false # Damage control disabled
+bashToolPatterns: []           # Empty pattern array (protection disabled)
+if (false) { security_check(); } # Security in unreachable code
+return true; // skip security  # Early return bypassing checks
+@skip("security test")         # Skipped security tests
+```
+
+**Why This Matters**: Attempting to disable or bypass security systems (damage control, hooks, validation) is the most critical form of gaming. This represents intentional circumvention of safety mechanisms.
+
+**Impact**: Security bypass patterns have **gaming score weight of 1.0** (instant block at 0.5+ threshold)
 
 ### Test Gaming Patterns
 ```python
@@ -84,6 +101,7 @@ bun ~/.claude/hooks/no-mock-validator.ts
 
 ## Violation Types
 
+- `DGTS_SECURITY_BYPASS`: **NEW - CRITICAL** - Disabled security systems (damage control, hooks, patterns)
 - `DGTS_TEST_GAMING`: Fake test implementations
 - `DGTS_CODE_GAMING`: Commented validation rules
 - `DGTS_FEATURE_FAKING`: Mock data for completed features

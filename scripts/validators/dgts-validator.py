@@ -58,6 +58,33 @@ GAMING_PATTERNS = {
         (r"lorem\s+ipsum", "Lorem ipsum placeholder"),
         (r"from\s+faker\s+import", "Faker library in production code"),
     ],
+    "security_bypass": [
+        # Commented security checks
+        (r"//\s*(damage[_-]?control|security[_-]?check|auth[_-]?check|permission[_-]?check)", "Commented security check (JS/TS)"),
+        (r"#\s*(damage[_-]?control|security[_-]?check|auth[_-]?check|permission[_-]?check)", "Commented security check (Python)"),
+        (r"/\*\s*(damage[_-]?control|security[_-]?check|auth[_-]?check|permission[_-]?check)", "Commented security check (block comment)"),
+        # Disabled hooks
+        (r"hooks\s*:\s*\[\s*\]", "Empty hooks array (security disabled)"),
+        (r"hooks\s*=\s*\[\s*\]", "Empty hooks array (security disabled)"),
+        # Disabled damage control
+        (r"DAMAGE_CONTROL_ENABLED\s*[:=]\s*false", "Damage control explicitly disabled"),
+        (r"DAMAGE_CONTROL_ENABLED\s*[:=]\s*False", "Damage control explicitly disabled"),
+        (r"SKIP_SECURITY_CHECKS\s*[:=]\s*true", "Security checks explicitly skipped"),
+        (r"SKIP_SECURITY_CHECKS\s*[:=]\s*True", "Security checks explicitly skipped"),
+        # Empty pattern arrays
+        (r"(bashToolPatterns|editToolPatterns|writeToolPatterns)\s*:\s*\[\s*\]", "Empty pattern array (protection disabled)"),
+        (r"patterns\s*:\s*\[\s*\]", "Empty patterns array (protection disabled)"),
+        # Security theater
+        (r"if\s*\(\s*false\s*\)\s*\{[^}]*(security|damage[_-]?control|auth)", "Security code in unreachable if(false) block"),
+        (r"if\s+False\s*:[^:]*?(security|damage[_-]?control|auth)", "Security code in unreachable if False block"),
+        (r"return\s+true\s*;?\s*//\s*(skip|bypass|disable)\s+(security|validation)", "Early return bypassing security (JS/TS)"),
+        (r"return\s+True\s*#\s*(skip|bypass|disable)\s+(security|validation)", "Early return bypassing security (Python)"),
+        # Disabled validation
+        (r"@pytest\.mark\.skip.*security", "Skipped security test"),
+        (r"@unittest\.skip.*security", "Skipped security test"),
+        (r"it\.skip.*security", "Skipped security test (Jest)"),
+        (r"test\.skip.*security", "Skipped security test (Vitest)"),
+    ],
 }
 
 # File patterns to scan

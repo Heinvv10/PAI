@@ -112,7 +112,16 @@ class PAIValidationOrchestrator {
       critical: true, // BLOCKING - phase cannot complete with mocks
     });
 
-    // 1.5 TypeScript/ESLint (Auto-discovered)
+    // 1.5 Damage Control Assessment (BLOCKING)
+    await this.runValidation({
+      name: 'Damage Control',
+      description: 'Security pattern violations in staged files',
+      command: 'bun "' + (process.env.USERPROFILE || process.env.HOME) + '/.claude/hooks/lib/damage-control-validator.ts"',
+      fallback: () => this.log('⚠️  Damage Control validator not found - skipping', 'yellow'),
+      critical: true, // BLOCKING - prevents dangerous code from being committed
+    });
+
+    // 1.6 TypeScript/ESLint (Auto-discovered)
     const hasTypeScript = fs.existsSync('tsconfig.json');
     const hasESLint = fs.existsSync('.eslintrc.json') || fs.existsSync('.eslintrc.js');
 

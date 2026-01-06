@@ -1,0 +1,14 @@
+# Project-specific damage control patterns
+# Override global patterns with project-specific rules
+
+bashToolPatterns:
+  # Allow git push --force-with-lease for feature branches
+  - pattern: '\bgit\s+push\s+origin\s+feature/.*--force-with-lease'
+    reason: ALLOWED - Feature branch force push with lease
+    severity: low
+    allow: true
+
+pathProtection:
+  # Project-specific: Protect test integration directory from deletion
+  noDeletePaths:
+    - ".test-integration/"
