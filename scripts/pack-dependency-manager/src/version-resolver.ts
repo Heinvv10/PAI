@@ -22,14 +22,14 @@ interface ParsedVersion {
 /**
  * Version constraint type
  */
-type ConstraintType = 'exact' | 'caret' | 'tilde' | 'gte' | 'lte' | 'gt' | 'lt' | 'range';
+type ConstraintType = 'exact' | 'caret' | 'tilde' | 'gte' | 'lte' | 'gt' | 'lt' | 'range' | 'any';
 
 /**
  * Parsed version range
  */
 interface ParsedRange {
   type: ConstraintType;
-  version: ParsedVersion;
+  version?: ParsedVersion; // Optional for 'any' type
   raw: string;
 }
 
@@ -62,6 +62,14 @@ export class VersionResolver {
    */
   static parseRange(range: VersionRange): ParsedRange {
     const trimmed = range.trim();
+
+    // Wildcard (any version)
+    if (trimmed === '*' || trimmed === 'x' || trimmed === 'X') {
+      return {
+        type: 'any',
+        raw: trimmed
+      };
+    }
 
     // Exact version
     if (/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/.test(trimmed) && !trimmed.startsWith('^') && !trimmed.startsWith('~')) {
@@ -193,12 +201,15 @@ export class VersionResolver {
     const parsedRange = this.parseRange(range);
 
     switch (parsedRange.type) {
+      case 'any':
+        return true; // Wildcard matches any version
+
       case 'exact':
-        return this.compareVersions(version, this.versionToString(parsedRange.version)) === 0;
+        return this.compareVersions(version, this.versionToString(parsedRange.version!)) === 0;
 
       case 'caret': {
         // ^1.2.3 -> >=1.2.3 <2.0.0
-        const minVersion = parsedRange.version;
+        const minVersion = parsedRange.version!;
         const maxVersion = {
           ...minVersion,
           major: minVersion.major + 1,
@@ -214,7 +225,7 @@ export class VersionResolver {
 
       case 'tilde': {
         // ~1.2.3 -> >=1.2.3 <1.3.0
-        const minVersion = parsedRange.version;
+        const minVersion = parsedRange.version!;
         const maxVersion = {
           ...minVersion,
           minor: minVersion.minor + 1,
@@ -228,16 +239,16 @@ export class VersionResolver {
       }
 
       case 'gte':
-        return this.compareVersions(version, this.versionToString(parsedRange.version)) >= 0;
+        return this.compareVersions(version, this.versionToString(parsedRange.version!)) >= 0;
 
       case 'lte':
-        return this.compareVersions(version, this.versionToString(parsedRange.version)) <= 0;
+        return this.compareVersions(version, this.versionToString(parsedRange.version!)) <= 0;
 
       case 'gt':
-        return this.compareVersions(version, this.versionToString(parsedRange.version)) > 0;
+        return this.compareVersions(version, this.versionToString(parsedRange.version!)) > 0;
 
       case 'lt':
-        return this.compareVersions(version, this.versionToString(parsedRange.version)) < 0;
+        return this.compareVersions(version, this.versionToString(parsedRange.version!)) < 0;
 
       default:
         return false;

@@ -89,6 +89,13 @@ describe('Range Matching', () => {
     expect(VersionResolver.satisfies('2.0.0', '<=2.0.0')).toBe(true);
     expect(VersionResolver.satisfies('2.0.1', '<=2.0.0')).toBe(false);
   });
+
+  test('wildcard matching (*)', () => {
+    expect(VersionResolver.satisfies('1.0.0', '*')).toBe(true);
+    expect(VersionResolver.satisfies('2.5.10', '*')).toBe(true);
+    expect(VersionResolver.satisfies('0.0.1', '*')).toBe(true);
+    expect(VersionResolver.satisfies('99.99.99', '*')).toBe(true);
+  });
 });
 
 describe('Best Match Selection', () => {
